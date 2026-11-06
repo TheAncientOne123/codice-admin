@@ -1,0 +1,612 @@
+/* ── Sección (mismo marco que tenían las secciones destacadas de portada) ── */
+.section {
+  margin: 4rem 0 2rem;
+  padding: 2.5rem 0;
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  background: color-mix(in srgb, var(--ifm-color-emphasis-100) 35%, transparent);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.subtitle {
+  margin: 0.5rem auto 0;
+  max-width: 42rem;
+  color: var(--ifm-color-emphasis-700);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.skeleton {
+  height: 420px;
+  border-radius: 16px;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  background: var(--ifm-background-surface-color);
+}
+
+/* ── Barra superior ── */
+.boardWrap {
+  --tl-accent: var(--ifm-color-primary-dark);
+  --tl-dot: color-mix(in srgb, var(--ifm-color-emphasis-500) 45%, transparent);
+  --tl-card: var(--ifm-background-surface-color);
+  --tl-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme='dark'] .boardWrap {
+  --tl-accent: var(--ifm-color-primary);
+  --tl-dot: rgba(255, 255, 255, 0.09);
+  --tl-card: #242526;
+  --tl-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  font-size: 0.82rem;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.legendSwatch {
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.swatchBar {
+  width: 1.4rem;
+  height: 0.55rem;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--tl-accent) 35%, transparent);
+  border-left: 3px solid var(--tl-accent);
+}
+
+.swatchPin {
+  width: 0.6rem;
+  height: 0.6rem;
+  transform: rotate(45deg);
+  background: var(--tl-accent);
+  margin: 0 0.2rem;
+}
+
+.swatchPlanned {
+  width: 1.4rem;
+  height: 0.55rem;
+  border-radius: 4px;
+  border: 1.5px dashed var(--ifm-color-emphasis-600);
+}
+
+.controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem;
+  border-radius: 10px;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  background: var(--ifm-background-surface-color);
+}
+
+.ctrl {
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 0.5rem;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--ifm-font-color-base);
+  font: inherit;
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.ctrlText {
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.ctrl:hover {
+  background: var(--ifm-color-emphasis-200);
+}
+
+.ctrl:focus-visible {
+  outline: 2px solid var(--tl-accent);
+  outline-offset: 1px;
+}
+
+.zoomValue {
+  min-width: 3rem;
+  text-align: center;
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--ifm-color-emphasis-600);
+}
+
+/* ── Lienzo ── */
+.board {
+  position: relative;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-radius: 16px;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  background-color: var(--ifm-background-surface-color);
+  /* Rejilla de puntos tipo lienzo: se desplaza con el contenido */
+  background-image: radial-gradient(var(--tl-dot) 1.2px, transparent 1.3px);
+  background-size: 22px 22px;
+  background-attachment: local;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 8px 28px rgba(0, 0, 0, 0.06);
+  cursor: grab;
+  user-select: none;
+  touch-action: pan-x pan-y;
+  scrollbar-width: thin;
+}
+
+.board:focus-visible {
+  outline: 2px solid var(--tl-accent);
+  outline-offset: 2px;
+}
+
+.boardDragging {
+  cursor: grabbing;
+}
+
+.boardDragging .bar,
+.boardDragging .pin {
+  pointer-events: none;
+}
+
+.world {
+  position: relative;
+}
+
+.gridLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 1px dashed color-mix(in srgb, var(--ifm-color-emphasis-400) 35%, transparent);
+  pointer-events: none;
+}
+
+.gridLineMajor {
+  border-left: 1px solid color-mix(in srgb, var(--ifm-color-emphasis-500) 45%, transparent);
+}
+
+.axis {
+  position: sticky;
+  top: 0;
+  height: 52px;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  background: color-mix(in srgb, var(--ifm-background-surface-color) 82%, transparent);
+  backdrop-filter: blur(2px);
+  z-index: 2;
+}
+
+.tick {
+  position: absolute;
+  bottom: 0.4rem;
+  transform: translateX(6px);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.tickMajor {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--ifm-font-color-base);
+}
+
+.tickMinor {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ifm-color-emphasis-600);
+}
+
+/* ── Hoy ── */
+.todayLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 2px dashed var(--tl-accent);
+  z-index: 3;
+  pointer-events: none;
+}
+
+.todayPill {
+  position: absolute;
+  top: 3px;
+  left: 0;
+  transform: translateX(-50%);
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--tl-accent);
+  color: #1b1b1d;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ── Carriles ── */
+.lane {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px solid color-mix(in srgb, var(--lane-color) 30%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--lane-color) 7%, transparent),
+    transparent 70%
+  );
+}
+
+.laneHead {
+  position: sticky;
+  left: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0.4rem 0 0 0.75rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  background: var(--tl-card);
+  border: 1px solid color-mix(in srgb, var(--lane-color) 45%, transparent);
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  z-index: 2;
+}
+
+.laneDot {
+  display: inline-block;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--lane-color);
+  flex-shrink: 0;
+}
+
+.laneLink,
+.laneLink:hover {
+  color: var(--ifm-font-color-base);
+}
+
+/* ── Elementos ── */
+.bar,
+.pin {
+  position: absolute;
+  height: 40px;
+  margin-top: 4px;
+  padding: 0;
+  border: none;
+  font: inherit;
+  text-align: left;
+  color: var(--ifm-font-color-base);
+  cursor: pointer;
+  z-index: 1;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  padding: 0 0.7rem;
+  border-radius: 8px;
+  border-left: 4px solid var(--lane-color);
+  background: color-mix(in srgb, var(--lane-color) 20%, var(--tl-card));
+  box-shadow: var(--tl-shadow);
+  overflow: visible;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.bar:hover,
+.pin:hover .pinCard {
+  transform: translateY(-2px);
+}
+
+/* En curso: se desvanece hacia hoy */
+.barOngoing {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--lane-color) 22%, var(--tl-card)) 60%,
+    color-mix(in srgb, var(--lane-color) 6%, transparent)
+  );
+}
+
+.barOngoing::after {
+  content: '';
+  position: absolute;
+  right: -5px;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: var(--lane-color);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--lane-color) 60%, transparent);
+  animation: pulse 2s ease-out infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--lane-color) 55%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 10px transparent;
+  }
+}
+
+/* Proyecto futuro: contorno discontinuo */
+.barPlanned {
+  border: 1.5px dashed var(--lane-color);
+  border-left-width: 4px;
+  border-left-style: solid;
+  background: color-mix(in srgb, var(--lane-color) 6%, transparent);
+  box-shadow: none;
+}
+
+.itemText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  /* El texto de una barra larga se queda visible al desplazar el lienzo */
+  position: sticky;
+  left: 12px;
+  white-space: nowrap;
+  line-height: 1.2;
+  pointer-events: none;
+}
+
+.itemTitle {
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.itemDate {
+  font-size: 0.7rem;
+  color: var(--ifm-color-emphasis-700);
+}
+
+/* Hito de publicación: rombo sobre la fecha + tarjeta */
+.pin {
+  display: flex;
+  align-items: center;
+  background: transparent;
+}
+
+.pinDiamond {
+  position: absolute;
+  left: -8px;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  margin-top: -8px;
+  transform: rotate(45deg);
+  border-radius: 3px;
+  background: var(--lane-color);
+  box-shadow: 0 0 0 3px var(--tl-card), 0 0 14px color-mix(in srgb, var(--lane-color) 60%, transparent);
+  z-index: 1;
+}
+
+.pinCard {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  height: 40px;
+  margin-left: 16px;
+  padding: 0 0.7rem 0 0.35rem;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--lane-color) 50%, transparent);
+  background: var(--tl-card);
+  box-shadow: var(--tl-shadow);
+  transition: transform 0.15s ease;
+}
+
+.pinCover {
+  width: 24px;
+  height: 34px;
+  border-radius: 3px;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.bar:focus-visible,
+.pin:focus-visible .pinCard {
+  outline: 2px solid var(--tl-accent);
+  outline-offset: 2px;
+}
+
+.selected.bar,
+.selected .pinCard {
+  box-shadow: 0 0 0 2px var(--tl-accent), var(--tl-shadow);
+}
+
+.hint {
+  margin: 0.6rem 0 0;
+  font-size: 0.78rem;
+  text-align: center;
+  color: var(--ifm-color-emphasis-600);
+}
+
+.hint kbd {
+  font-size: 0.7rem;
+  padding: 0.05rem 0.3rem;
+}
+
+/* ── Detalle ── */
+.detail {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.detailCard {
+  position: relative;
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+  max-width: 640px;
+  padding: 1rem 2.5rem 1rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-left: 4px solid var(--lane-color);
+  background: var(--ifm-background-surface-color);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.06);
+  animation: rise 0.2s ease-out;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.detailCover {
+  width: 72px;
+  height: 108px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.detailBody {
+  min-width: 0;
+}
+
+.detailKicker {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.25rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.detailTitle {
+  margin: 0 0 0.25rem;
+  font-size: 1.1rem;
+}
+
+.detailDate {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.approx {
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  border: 1px dashed var(--ifm-color-emphasis-400);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.detailText {
+  margin: 0 0 0.5rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.detailLink {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--tl-accent);
+}
+
+.detailLink:hover {
+  color: var(--tl-accent);
+}
+
+.detailClose {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 1.8rem;
+  height: 1.8rem;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ifm-color-emphasis-600);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.detailClose:hover {
+  background: var(--ifm-color-emphasis-200);
+}
+
+.detailEmpty {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--ifm-color-emphasis-600);
+}
+
+@media (max-width: 640px) {
+  .toolbar {
+    justify-content: center;
+  }
+
+  .detailCover {
+    width: 56px;
+    height: 84px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .barOngoing::after,
+  .detailCard {
+    animation: none;
+  }
+
+  .bar,
+  .pinCard {
+    transition: none;
+  }
+}
+
+/* Admin: el modo oscuro sigue al sistema (no hay data-theme). */
+@media (prefers-color-scheme: dark) {
+  .boardWrap {
+    --tl-accent: var(--ifm-color-primary);
+    --tl-dot: rgba(255, 255, 255, 0.09);
+    --tl-card: #242526;
+    --tl-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+  }
+}
