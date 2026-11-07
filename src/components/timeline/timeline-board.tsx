@@ -1,6 +1,6 @@
 'use client';
 // Copia de authorsite2/src/components/WorkTimeline/WorkTimelineBoard.tsx (vista previa en el admin).
-import React, {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore} from 'react';
 import clsx from 'clsx';
 import type {TimelineEntry, TimelineKind, TimelineLane} from './types';
 import styles from './workTimeline.module.css';
@@ -79,10 +79,23 @@ export type WorkTimelineBoardProps = {
   entries?: TimelineEntry[];
 };
 
-export default function WorkTimelineBoard({
+// La hora actual solo se lee en el navegador: en el servidor (prerender) no hay "hoy" estable.
+let clientNow: number | undefined;
+const getClientNow = () => (clientNow ??= Date.now());
+const getServerNow = () => null;
+const noopSubscribe = () => () => {};
+
+export default function WorkTimelineBoard(props: WorkTimelineBoardProps = {}) {
+  const today = useSyncExternalStore(noopSubscribe, getClientNow, getServerNow);
+  if (today === null) return <div className={styles.skeleton} aria-busy="true" />;
+  return <Board {...props} today={today} />;
+}
+
+function Board({
   lanes: laneData = [],
   entries: entryData = [],
-}: WorkTimelineBoardProps = {}) {
+  today,
+}: WorkTimelineBoardProps & {today: number}) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [pxPerYear, setPxPerYear] = useState(DEFAULT_PX_PER_YEAR);
   // Selección inicial: la publicación más reciente.
@@ -93,8 +106,6 @@ export default function WorkTimelineBoard({
         .sort((a, b) => parseDate(b.start) - parseDate(a.start))[0]?.id ?? null,
   );
   const [dragging, setDragging] = useState(false);
-  // Hora fija para todo el ciclo de vida del tablero (inicializador perezoso: render puro).
-  const [today] = useState(() => Date.now());
 
   /* Rango temporal: medio año antes del primer hito y uno después del último. */
   const [minT, maxT] = useMemo(() => {
